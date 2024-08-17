@@ -1,5 +1,6 @@
 use macroquad::input::{
-    get_char_pressed, is_key_released, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released, mouse_delta_position, mouse_position
+    get_char_pressed, is_key_released, is_mouse_button_pressed, is_mouse_button_released,
+    mouse_position,
 };
 
 #[derive(Debug)]
@@ -8,8 +9,10 @@ pub enum Operation {
     MousePosition { x: f32, y: f32 },
     MouseDown { x: f32, y: f32 },
     MouseUp { x: f32, y: f32 },
-    RightClick { x: f32, y: f32 },
-    ToggleDebug
+    Remove { x: f32, y: f32 },
+    DragStart { x: f32, y: f32 },
+    DragEnd,
+    ToggleDebug,
 }
 
 pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
@@ -41,8 +44,19 @@ pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
         });
     }
 
+    if is_mouse_button_pressed(macroquad::input::MouseButton::Right) {
+        operations.push(Operation::DragStart {
+            x: normalised_position.0,
+            y: normalised_position.1,
+        });
+    }
+
     if is_mouse_button_released(macroquad::input::MouseButton::Right) {
-        operations.push(Operation::RightClick {
+        operations.push(Operation::DragEnd);
+    }
+
+    if is_mouse_button_released(macroquad::input::MouseButton::Middle) {
+        operations.push(Operation::Remove {
             x: normalised_position.0,
             y: normalised_position.1,
         });

@@ -1,12 +1,7 @@
-use std::{collections::HashSet, ops::Deref};
-
 use macroquad::math::{vec2, Vec2};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{
-    physics_system::PhysicsSystem,
-    point::{self, Point},
-};
+use crate::{physics_system::PhysicsSystem, point::Point};
 
 pub struct SimulationParams {
     pub gravity: f32,
@@ -15,7 +10,7 @@ pub struct SimulationParams {
     pub spring_coeff: f32,
     pub damping: f32,
     pub collision_force: f32,
-    pub push_from_sides_force: f32
+    pub push_from_sides_force: f32,
 }
 
 pub struct SimulationBoundingBox {
@@ -35,6 +30,10 @@ impl Simulator {
             params,
             bounding_box,
         }
+    }
+
+    pub fn calculate_velocity(from: Vec2, to: Vec2, delta: f32) -> Vec2 {
+        (to - from) / delta
     }
 
     fn apply_gravity(&self, physics_system: &mut PhysicsSystem, delta: f32) {

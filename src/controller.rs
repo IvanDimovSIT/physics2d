@@ -1,20 +1,16 @@
 use macroquad::{math::vec2, miniquad::window::screen_size};
 
 use crate::{
-    constraint::Constraint,
-    input::Operation,
-    physics_system::{self, PhysicsSystem},
-    point::{self, Point},
-    renderer::Renderer,
-    simulator::Simulator,
-    ui_renderer::UiRenderer,
+    constraint::Constraint, input::Operation, physics_system::PhysicsSystem, point::Point,
+    renderer::Renderer, simulator::Simulator, ui_renderer::UiRenderer,
 };
 
 struct ControllerState {
     mouse_pos: (f32, f32),
     is_paused: bool,
-    is_debug_mode: bool, 
+    is_debug_mode: bool,
     selected_point: Option<u64>,
+    is_draging: bool,
 }
 
 pub struct Controller {
@@ -40,7 +36,8 @@ impl Controller {
                 mouse_pos: (0.0, 0.0),
                 is_paused: true,
                 selected_point: None,
-                is_debug_mode: false
+                is_debug_mode: false,
+                is_draging: false,
             },
         }
     }
@@ -49,9 +46,34 @@ impl Controller {
         self.state.is_paused = !self.state.is_paused;
     }
 
-    fn handle_move(&mut self, x: &f32, y: &f32) {
+    fn handle_move(&mut self, x: &f32, y: &f32, delta: f32) {
+        let old_mouse_pos = self.state.mouse_pos;
         self.state.mouse_pos.0 = *x;
         self.state.mouse_pos.1 = *y;
+
+        if !self.state.is_draging {
+            return;
+        }
+        if self.state.selected_point.is_none() {
+            self.state.is_draging = false;
+            return;
+        }
+        let id = self.state.selected_point.expect("Id should be valid");
+
+        let option_point = self.physics_system.get_point_mut(id);
+        if option_point.is_none() {
+            self.state.is_draging = false;
+            self.state.selected_point = None;
+            return;
+        }
+        let point = option_point.unwrap();
+
+        point.location = vec2(self.state.mouse_pos.0, self.state.mouse_pos.1);
+        point.velocity = Simulator::calculate_velocity(
+            vec2(old_mouse_pos.0, old_mouse_pos.1),
+            point.location,
+            delta,
+        );
     }
 
     fn find_point_id_for_location(&self, x: f32, y: f32) -> Option<u64> {
@@ -64,6 +86,7 @@ impl Controller {
     }
 
     fn handle_mouse_down(&mut self, x: &f32, y: &f32) {
+        self.state.is_draging = false;
         let point_id = self.find_point_id_for_location(*x, *y);
         if point_id.is_some() {
             self.state.selected_point = point_id;
@@ -83,6 +106,7 @@ impl Controller {
     }
 
     fn handle_mouse_up(&mut self, x: &f32, y: &f32) {
+        self.state.is_draging = false;
         let point_id = self.find_point_id_for_location(*x, *y);
         if point_id.is_none() || self.state.selected_point.is_none() {
             self.state.selected_point = None;
@@ -112,6 +136,7 @@ impl Controller {
     }
 
     fn handle_right_click(&mut self, x: &f32, y: &f32) {
+        self.state.is_draging = false;
         self.state.selected_point = None;
         let id = self.find_point_id_for_location(*x, *y);
         if id.is_none() {
@@ -125,15 +150,32 @@ impl Controller {
         self.state.is_debug_mode = !self.state.is_debug_mode;
     }
 
-    pub fn handle_input(&mut self, input: &[Operation]) {
+    fn handle_drag_start(&mut self, x: &f32, y: &f32) {
+        self.state.selected_point = None;
+        let id = self.find_point_id_for_location(*x, *y);
+        if id.is_none() {
+            return;
+        }
+        self.state.selected_point = id;
+        self.state.is_draging = true;
+    }
+
+    fn handle_drag_end(&mut self) {
+        self.state.is_draging = false;
+        self.state.selected_point = None;
+    }
+
+    pub fn handle_input(&mut self, input: &[Operation], delta: f32) {
         for operation in input {
             match operation {
                 Operation::PauseUnpause => self.handle_pause_unpause(),
-                Operation::MousePosition { x, y } => self.handle_move(x, y),
+                Operation::MousePosition { x, y } => self.handle_move(x, y, delta),
                 Operation::MouseDown { x, y } => self.handle_mouse_down(x, y),
                 Operation::MouseUp { x, y } => self.handle_mouse_up(x, y),
-                Operation::RightClick { x, y } => self.handle_right_click(x, y),
+                Operation::Remove { x, y } => self.handle_right_click(x, y),
                 Operation::ToggleDebug => self.handle_toggle_debug(),
+                Operation::DragStart { x, y } => self.handle_drag_start(x, y),
+                Operation::DragEnd => self.handle_drag_end(),
                 //_ => println!("Unhandled input operation: {:?}", operation)
             }
         }
@@ -146,7 +188,7 @@ impl Controller {
     }
 
     fn draw_ui_constraint_line(&self, screen_size: (f32, f32)) {
-        if self.state.selected_point.is_none() {
+        if self.state.selected_point.is_none() || self.state.is_draging {
             return;
         }
 
@@ -174,10 +216,10 @@ impl Controller {
                 screen_size,
                 self.state.mouse_pos,
                 self.physics_system.get_points_ids().len(),
-                self.physics_system.get_constraints().len()
+                self.physics_system.get_constraints().len(),
             );
         }
-        
+
         if self.state.is_paused {
             self.ui_renderer.draw_paused_text(screen_size);
         }

@@ -25,10 +25,10 @@ fn construct_controller() -> Controller {
             air_resistence: 0.995,
             gravity: 0.02,
             point_size,
-            spring_coeff: 12.0,
-            damping: 4.0,
-            collision_force: 50.0,
-            push_from_sides_force: 0.02
+            spring_coeff: 20.0,
+            damping: 5.0,
+            collision_force: 80.0,
+            push_from_sides_force: 0.02,
         },
         SimulationBoundingBox {
             max_x: 1.0,
@@ -58,7 +58,7 @@ fn construct_controller() -> Controller {
     Controller::new(physics_system, simulator, renderer, ui_renderer)
 }
 
-#[macroquad::main("Test")]
+#[macroquad::main("Physics")]
 async fn main() {
     let mut controller = construct_controller();
 
@@ -68,11 +68,10 @@ async fn main() {
         let delta = get_frame_time();
         let screen_size = screen_size();
 
-        controller.handle_input(&get_input(screen_size));
+        controller.handle_input(&get_input(screen_size), delta);
         controller.next_step(delta);
         controller.draw_frame();
 
- 
         next_frame().await;
     }
 }

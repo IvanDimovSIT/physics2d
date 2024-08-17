@@ -1,6 +1,4 @@
-use macroquad::{color::Color, math::Vec2, shapes::draw_line, text::draw_text, time::get_fps, ui::Ui};
-
-use crate::point;
+use macroquad::{color::Color, math::Vec2, shapes::draw_line, text::draw_text, time::get_fps};
 
 pub struct UiParams {
     pub paused_text_location: (f32, f32),
@@ -10,7 +8,7 @@ pub struct UiParams {
     pub line_color: Color,
     pub debug_text_location: (f32, f32),
     pub debug_text_size: f32,
-    pub debug_text_color: Color
+    pub debug_text_color: Color,
 }
 
 pub struct UiRenderer {
@@ -32,36 +30,33 @@ impl UiRenderer {
         );
     }
 
-    pub fn draw_debug_text(&self, screen_size: (f32, f32), mouse_pos: (f32, f32), points: usize, constraints: usize) {
+    pub fn draw_debug_text(
+        &self,
+        screen_size: (f32, f32),
+        mouse_pos: (f32, f32),
+        points: usize,
+        constraints: usize,
+    ) {
         draw_text(
-            &format!(
-                "FPS:{}",
-                get_fps()
-            ),
+            &format!("FPS:{}", get_fps()),
             self.params.debug_text_location.0 * screen_size.0,
             self.params.debug_text_location.1 * screen_size.1,
             self.params.debug_text_size * screen_size.0.min(screen_size.1),
             self.params.debug_text_color,
         );
         draw_text(
-            &format!(
-                "X:{:.3} Y:{:.3}",
-                mouse_pos.0,
-                mouse_pos.1,
-            ),
+            &format!("X:{:.3} Y:{:.3}", mouse_pos.0, mouse_pos.1,),
             self.params.debug_text_location.0 * screen_size.0,
-            self.params.debug_text_location.1 * screen_size.1 + self.params.debug_text_size * screen_size.1,
+            self.params.debug_text_location.1 * screen_size.1
+                + self.params.debug_text_size * screen_size.1,
             self.params.debug_text_size * screen_size.0.min(screen_size.1),
             self.params.debug_text_color,
         );
         draw_text(
-            &format!(
-                "points:{} constraints:{}",
-                points,
-                constraints
-            ),
+            &format!("points:{} constraints:{}", points, constraints),
             self.params.debug_text_location.0 * screen_size.0,
-            self.params.debug_text_location.1 * screen_size.1 + self.params.debug_text_size * screen_size.1 * 2.0,
+            self.params.debug_text_location.1 * screen_size.1
+                + self.params.debug_text_size * screen_size.1 * 2.0,
             self.params.debug_text_size * screen_size.0.min(screen_size.1),
             self.params.debug_text_color,
         );

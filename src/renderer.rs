@@ -5,10 +5,7 @@ use macroquad::{
     shapes::{draw_ellipse, draw_line},
 };
 
-use crate::{
-    physics_system::PhysicsSystem,
-    point::Point,
-};
+use crate::{physics_system::PhysicsSystem, point::Point};
 
 pub struct DrawParams {
     pub point_size: f32,
@@ -60,7 +57,7 @@ impl Renderer {
             );
         }
 
-        for (_id, point) in physics_system.get_points_ids() {
+        for point in physics_system.get_points_ids().values() {
             if point.is_static {
                 self.draw_point(point, self.draw_params.static_point_color, screen_size);
             } else {
