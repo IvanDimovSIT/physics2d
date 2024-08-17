@@ -3,11 +3,10 @@ use macroquad::{
     math::Vec2,
     miniquad::window::screen_size,
     shapes::{draw_ellipse, draw_line},
-    texture::get_screen_data,
 };
 
 use crate::{
-    physics_system::{self, PhysicsSystem},
+    physics_system::PhysicsSystem,
     point::Point,
 };
 

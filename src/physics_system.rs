@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{
-    constraint::Constraint,
-    point::Point,
-};
+use crate::{constraint::Constraint, point::Point};
 
 const STARTING_CAPACITY: usize = 8;
 

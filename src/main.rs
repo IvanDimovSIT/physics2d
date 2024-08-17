@@ -17,16 +17,18 @@ mod simulator;
 mod ui_renderer;
 
 fn construct_controller() -> Controller {
-    let point_size = 0.02;
-    let line_size = 0.01;
+    let point_size = 0.015;
+    let line_size = 0.005;
     let physics_system = PhysicsSystem::new();
     let simulator = Simulator::new(
         SimulationParams {
-            air_resistence: 0.999,
+            air_resistence: 0.995,
             gravity: 0.02,
             point_size,
             spring_coeff: 12.0,
             damping: 4.0,
+            collision_force: 50.0,
+            push_from_sides_force: 0.02
         },
         SimulationBoundingBox {
             max_x: 1.0,
@@ -38,16 +40,19 @@ fn construct_controller() -> Controller {
     let renderer = Renderer::new(DrawParams {
         point_size,
         line_size,
-        point_color: Color::from_rgba(255, 0, 0, 255),
-        static_point_color: Color::from_rgba(0, 255, 0, 255),
-        line_color: Color::from_rgba(255, 0, 0, 255),
+        point_color: Color::from_rgba(255, 255, 255, 255),
+        static_point_color: Color::from_rgba(255, 50, 50, 255),
+        line_color: Color::from_rgba(255, 255, 255, 255),
     });
     let ui_renderer = UiRenderer::new(UiParams {
-        paused_text_location: (0.08, 0.08),
+        paused_text_location: (0.45, 0.08),
         paused_text_size: 0.08,
         paused_text_color: WHITE,
         line_size,
-        line_color: Color::from_rgba(255, 0, 0, 255),
+        line_color: Color::from_rgba(255, 255, 255, 100),
+        debug_text_location: (0.01, 0.05),
+        debug_text_size: 0.05,
+        debug_text_color: Color::from_rgba(255, 255, 255, 160),
     });
 
     Controller::new(physics_system, simulator, renderer, ui_renderer)
@@ -67,19 +72,7 @@ async fn main() {
         controller.next_step(delta);
         controller.draw_frame();
 
-        let pos = mouse_position();
-        draw_text(
-            &format!(
-                "X:{} Y:{} FPS:{}",
-                pos.0 / screen_size.0,
-                pos.1 / screen_size.1,
-                get_fps()
-            ),
-            0.05 * screen_size.0,
-            0.95 * screen_size.1,
-            0.04 * screen_size.1,
-            WHITE,
-        );
+ 
         next_frame().await;
     }
 }

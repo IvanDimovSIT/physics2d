@@ -1,15 +1,11 @@
 use std::{collections::HashSet, ops::Deref};
 
-use macroquad::{
-    math::{vec2, Vec2},
-    rand::ChooseRandom,
-};
+use macroquad::math::{vec2, Vec2};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
-    physics_system::{self, PhysicsSystem},
-    point,
-    renderer::DrawParams,
+    physics_system::PhysicsSystem,
+    point::{self, Point},
 };
 
 pub struct SimulationParams {
@@ -18,6 +14,8 @@ pub struct SimulationParams {
     pub point_size: f32,
     pub spring_coeff: f32,
     pub damping: f32,
+    pub collision_force: f32,
+    pub push_from_sides_force: f32
 }
 
 pub struct SimulationBoundingBox {
@@ -63,7 +61,7 @@ impl Simulator {
         for point in physics_system.get_points_mut() {
             if point.location.x + self.params.point_size > self.bounding_box.max_x {
                 point.location.x = self.bounding_box.max_x - self.params.point_size;
-                point.velocity.x = 0.0;
+                point.velocity.x = -self.params.push_from_sides_force;
             }
 
             if point.location.y + self.params.point_size > self.bounding_box.max_y {
@@ -73,7 +71,7 @@ impl Simulator {
 
             if point.location.x - self.params.point_size < self.bounding_box.min_x {
                 point.location.x = self.bounding_box.min_x + self.params.point_size;
-                point.velocity.x = 0.0;
+                point.velocity.x = self.params.push_from_sides_force;
             }
 
             if point.location.y - self.params.point_size < self.bounding_box.min_y {
@@ -83,11 +81,7 @@ impl Simulator {
         }
     }
 
-    fn apply_point_changes(
-        &self,
-        physics_system: &mut PhysicsSystem,
-        point_changes: &[(u64, u64, Vec2)],
-    ) {
+    fn apply_point_changes(physics_system: &mut PhysicsSystem, point_changes: &[(u64, u64, Vec2)]) {
         for (id1, id2, delta_v) in point_changes {
             let point1 = physics_system.get_point_mut(*id1).expect("Invalid id");
             point1.velocity += *delta_v;
@@ -104,10 +98,10 @@ impl Simulator {
             .map(|c| {
                 let point1 = physics_system
                     .get_point(c.get_point1())
-                    .expect("Invalid constraint: point is none");
+                    .expect("Invalid constraint: point should be some");
                 let point2 = physics_system
                     .get_point(c.get_point2())
-                    .expect("Invalid constraint: point is none");
+                    .expect("Invalid constraint: point should be some");
 
                 let direction = point2.location - point1.location;
                 let distance_between_points = direction.length();
@@ -123,12 +117,58 @@ impl Simulator {
             })
             .collect();
 
-        self.apply_point_changes(physics_system, &point_changes);
+        Self::apply_point_changes(physics_system, &point_changes);
+    }
+
+    fn calculate_collision(&self, point1: &Point, point2: &Point, delta: f32) -> Vec2 {
+        let direction = point1.location - point2.location;
+        let distance = direction.length();
+        if distance >= self.params.point_size * 2.0 {
+            return vec2(0.0, 0.0);
+        }
+
+        let force = (self.params.point_size * 2.0 - distance) * self.params.collision_force * delta;
+
+        direction.normalize_or_zero() * force
+    }
+
+    fn apply_collision_velocity_changes(
+        physics_system: &mut PhysicsSystem,
+        point_changes: &[(u64, Vec2)],
+    ) {
+        for (id, delta_v) in point_changes {
+            let point = physics_system
+                .get_point_mut(*id)
+                .expect("Point should be found");
+            point.velocity += *delta_v;
+        }
+    }
+
+    fn apply_collisions(&self, physics_system: &mut PhysicsSystem, delta: f32) {
+        let point_changes: Vec<_> = physics_system
+            .get_points_ids()
+            .par_iter()
+            .map(|(id, point)| {
+                let mut change = vec2(0.0, 0.0);
+                for (other_id, other_point) in physics_system.get_points_ids() {
+                    if id == other_id {
+                        continue;
+                    }
+                    change += self.calculate_collision(point, other_point, delta);
+                }
+
+                (*id, change)
+            })
+            .filter(|(_id, v)| v.x != 0.0 || v.y != 0.0)
+            .collect();
+
+        Self::apply_collision_velocity_changes(physics_system, &point_changes);
     }
 
     pub fn next_step(&self, physics_system: &mut PhysicsSystem, delta: f32) {
         self.apply_gravity(physics_system, delta);
         self.apply_constraints(physics_system, delta);
+        self.apply_collisions(physics_system, delta);
         self.apply_velocity(physics_system, delta);
         self.fit_in_screen(physics_system);
     }

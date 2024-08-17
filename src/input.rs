@@ -1,6 +1,5 @@
 use macroquad::input::{
-    get_char_pressed, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released,
-    mouse_delta_position, mouse_position,
+    get_char_pressed, is_key_released, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released, mouse_delta_position, mouse_position
 };
 
 #[derive(Debug)]
@@ -10,6 +9,7 @@ pub enum Operation {
     MouseDown { x: f32, y: f32 },
     MouseUp { x: f32, y: f32 },
     RightClick { x: f32, y: f32 },
+    ToggleDebug
 }
 
 pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
@@ -46,6 +46,10 @@ pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
             x: normalised_position.0,
             y: normalised_position.1,
         });
+    }
+
+    if is_key_released(macroquad::input::KeyCode::D) {
+        operations.push(Operation::ToggleDebug);
     }
 
     operations

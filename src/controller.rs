@@ -13,6 +13,7 @@ use crate::{
 struct ControllerState {
     mouse_pos: (f32, f32),
     is_paused: bool,
+    is_debug_mode: bool, 
     selected_point: Option<u64>,
 }
 
@@ -39,6 +40,7 @@ impl Controller {
                 mouse_pos: (0.0, 0.0),
                 is_paused: true,
                 selected_point: None,
+                is_debug_mode: false
             },
         }
     }
@@ -119,6 +121,10 @@ impl Controller {
         self.physics_system.remove_point(id.unwrap());
     }
 
+    fn handle_toggle_debug(&mut self) {
+        self.state.is_debug_mode = !self.state.is_debug_mode;
+    }
+
     pub fn handle_input(&mut self, input: &[Operation]) {
         for operation in input {
             match operation {
@@ -127,6 +133,7 @@ impl Controller {
                 Operation::MouseDown { x, y } => self.handle_mouse_down(x, y),
                 Operation::MouseUp { x, y } => self.handle_mouse_up(x, y),
                 Operation::RightClick { x, y } => self.handle_right_click(x, y),
+                Operation::ToggleDebug => self.handle_toggle_debug(),
                 //_ => println!("Unhandled input operation: {:?}", operation)
             }
         }
@@ -162,6 +169,15 @@ impl Controller {
         let screen_size = screen_size();
 
         self.draw_ui_constraint_line(screen_size);
+        if self.state.is_debug_mode {
+            self.ui_renderer.draw_debug_text(
+                screen_size,
+                self.state.mouse_pos,
+                self.physics_system.get_points_ids().len(),
+                self.physics_system.get_constraints().len()
+            );
+        }
+        
         if self.state.is_paused {
             self.ui_renderer.draw_paused_text(screen_size);
         }
