@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Constraint {
     point1: u64,
     point2: u64,

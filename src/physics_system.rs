@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::{
-    constraint::{self, Constraint},
+    constraint::Constraint,
     point::Point,
 };
 

@@ -4,7 +4,7 @@ use crate::{
     constraint::Constraint,
     input::Operation,
     physics_system::{self, PhysicsSystem},
-    point::Point,
+    point::{self, Point},
     renderer::Renderer,
     simulator::Simulator,
     ui_renderer::UiRenderer,
@@ -72,6 +72,14 @@ impl Controller {
             .add_point(Point::new(vec2(*x, *y), vec2(0.0, 0.0), false));
     }
 
+    fn toggle_static(&mut self, id: u64) {
+        let option_point = self.physics_system.get_point_mut(id);
+        if option_point.is_some() {
+            let point = option_point.unwrap();
+            point.is_static = !point.is_static;
+        }
+    }
+
     fn handle_mouse_up(&mut self, x: &f32, y: &f32) {
         let point_id = self.find_point_id_for_location(*x, *y);
         if point_id.is_none() || self.state.selected_point.is_none() {
@@ -84,6 +92,7 @@ impl Controller {
         self.state.selected_point = None;
 
         if id1 == id2 {
+            self.toggle_static(id1);
             return;
         }
 

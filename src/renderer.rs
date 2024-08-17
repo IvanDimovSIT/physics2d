@@ -61,7 +61,7 @@ impl Renderer {
             );
         }
 
-        for (id, point) in physics_system.get_points_ids() {
+        for (_id, point) in physics_system.get_points_ids() {
             if point.is_static {
                 self.draw_point(point, self.draw_params.static_point_color, screen_size);
             } else {

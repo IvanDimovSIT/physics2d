@@ -25,6 +25,8 @@ fn construct_controller() -> Controller {
             air_resistence: 0.999,
             gravity: 0.02,
             point_size,
+            spring_coeff: 12.0,
+            damping: 4.0,
         },
         SimulationBoundingBox {
             max_x: 1.0,
