@@ -22,11 +22,11 @@ fn construct_controller() -> Controller {
     let physics_system = PhysicsSystem::new();
     let simulator = Simulator::new(
         SimulationParams {
-            air_resistence: 0.995,
-            gravity: 0.02,
+            air_resistence: 0.98,
+            gravity: 0.08,
             point_size,
-            spring_coeff: 20.0,
-            damping: 5.0,
+            spring_coeff: 350.0,
+            damping: 6.0,
             collision_force: 80.0,
             push_from_sides_force: 0.02,
         },
