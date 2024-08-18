@@ -206,6 +206,24 @@ impl Controller {
         );
     }
 
+    fn draw_debug_window(&self, screen_size: (f32, f32)) {
+        let option_id =
+            self.find_point_id_for_location(self.state.mouse_pos.0, self.state.mouse_pos.1);
+        if option_id.is_none() {
+            return;
+        }
+        let id = option_id.unwrap();
+        let option_point = self.physics_system.get_point(id);
+        if option_point.is_none() {
+            return;
+        }
+        let point = option_point.unwrap();
+
+        let draw_at = (self.state.mouse_pos.0, self.state.mouse_pos.1 + 0.02);
+        self.ui_renderer
+            .draw_point_info(screen_size, id, point, draw_at);
+    }
+
     pub fn draw_frame(&self) {
         self.renderer.draw(&self.physics_system);
         let screen_size = screen_size();
@@ -218,6 +236,7 @@ impl Controller {
                 self.physics_system.get_points_ids().len(),
                 self.physics_system.get_constraints().len(),
             );
+            self.draw_debug_window(screen_size);
         }
 
         if self.state.is_paused {

@@ -53,6 +53,12 @@ fn construct_controller() -> Controller {
         debug_text_location: (0.01, 0.05),
         debug_text_size: 0.05,
         debug_text_color: Color::from_rgba(255, 255, 255, 160),
+        debug_point_text_color: Color::from_rgba(230, 230, 230, 255),
+        debug_point_text_size: 0.04,
+        debug_point_box_color: Color::from_rgba(50, 50, 50, 200),
+        debug_point_velocity_line_size: 0.002,
+        debug_point_velocity_line_color: Color::from_rgba(255, 40, 40, 255),
+        debug_point_velocity_line_length: 0.06,
     });
 
     Controller::new(physics_system, simulator, renderer, ui_renderer)
