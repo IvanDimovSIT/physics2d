@@ -13,6 +13,8 @@ pub enum Operation {
     DragStart { x: f32, y: f32 },
     DragEnd,
     ToggleDebug,
+    IncreaseSimulationSpeed,
+    DecreaseSimulationSpeed,
 }
 
 pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
@@ -64,6 +66,14 @@ pub fn get_input(screen_size: (f32, f32)) -> Vec<Operation> {
 
     if is_key_released(macroquad::input::KeyCode::D) {
         operations.push(Operation::ToggleDebug);
+    }
+
+    if is_key_released(macroquad::input::KeyCode::Left) {
+        operations.push(Operation::DecreaseSimulationSpeed);
+    }
+
+    if is_key_released(macroquad::input::KeyCode::Right) {
+        operations.push(Operation::IncreaseSimulationSpeed);
     }
 
     operations

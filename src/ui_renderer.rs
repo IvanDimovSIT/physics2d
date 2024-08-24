@@ -15,17 +15,24 @@ pub struct UiParams {
     pub paused_text_location: (f32, f32),
     pub paused_text_size: f32,
     pub paused_text_color: Color,
+
     pub line_size: f32,
     pub line_color: Color,
+
     pub debug_text_location: (f32, f32),
     pub debug_text_size: f32,
     pub debug_text_color: Color,
+
     pub debug_point_text_color: Color,
     pub debug_point_text_size: f32,
     pub debug_point_box_color: Color,
     pub debug_point_velocity_line_size: f32,
     pub debug_point_velocity_line_length: f32,
     pub debug_point_velocity_line_color: Color,
+
+    pub speed_text_location: (f32, f32),
+    pub speed_text_size: f32,
+    pub speed_text_color: Color,
 }
 
 pub struct UiRenderer {
@@ -144,6 +151,16 @@ impl UiRenderer {
             origin_y + self.params.debug_point_text_size * screen_size.1 * 2.0,
             self.params.debug_point_text_size * screen_size.0.min(screen_size.1),
             self.params.debug_point_text_color,
+        );
+    }
+
+    pub fn draw_simulation_speed(&self, screen_size: (f32, f32), speed: f32) {
+        draw_text(
+            &format!("Speed: X{:.2}", speed),
+            self.params.speed_text_location.0 * screen_size.0,
+            self.params.speed_text_location.1 * screen_size.1,
+            self.params.speed_text_size * screen_size.0.min(screen_size.1),
+            self.params.speed_text_color,
         );
     }
 }

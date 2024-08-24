@@ -5,12 +5,54 @@ use crate::{
     renderer::Renderer, simulator::Simulator, ui_renderer::UiRenderer,
 };
 
+struct SimulationSpeed {
+    speeds: Vec<f32>,
+    current: usize,
+}
+impl SimulationSpeed {
+    fn new() -> Self {
+        Self {
+            speeds: vec![0.1, 0.25, 0.5, 0.75, 1.0, 1.25],
+            current: 4,
+        }
+    }
+
+    fn get_speed(&self) -> f32 {
+        self.speeds[self.current]
+    }
+
+    fn increase_speed(&mut self) {
+        if self.current + 1 < self.speeds.len() {
+            self.current += 1;
+        }
+    }
+
+    fn decrease_speed(&mut self) {
+        if self.current > 0 {
+            self.current -= 1;
+        }
+    }
+}
+
 struct ControllerState {
     mouse_pos: (f32, f32),
     is_paused: bool,
     is_debug_mode: bool,
     selected_point: Option<u64>,
     is_draging: bool,
+    simualtion_speed: SimulationSpeed,
+}
+impl Default for ControllerState {
+    fn default() -> Self {
+        Self {
+            mouse_pos: (0.0, 0.0),
+            is_paused: true,
+            selected_point: None,
+            is_debug_mode: false,
+            is_draging: false,
+            simualtion_speed: SimulationSpeed::new(),
+        }
+    }
 }
 
 pub struct Controller {
@@ -32,13 +74,7 @@ impl Controller {
             simulator,
             renderer,
             ui_renderer,
-            state: ControllerState {
-                mouse_pos: (0.0, 0.0),
-                is_paused: true,
-                selected_point: None,
-                is_debug_mode: false,
-                is_draging: false,
-            },
+            state: ControllerState::default(),
         }
     }
 
@@ -165,25 +201,39 @@ impl Controller {
         self.state.selected_point = None;
     }
 
+    fn handle_increase_simulation_speed(&mut self) {
+        self.state.simualtion_speed.increase_speed();
+    }
+
+    fn handle_decrease_simulation_speed(&mut self) {
+        self.state.simualtion_speed.decrease_speed();
+    }
+
     pub fn handle_input(&mut self, input: &[Operation], delta: f32) {
         for operation in input {
             match operation {
                 Operation::PauseUnpause => self.handle_pause_unpause(),
-                Operation::MousePosition { x, y } => self.handle_move(x, y, delta),
+                Operation::MousePosition { x, y } => {
+                    self.handle_move(x, y, delta * self.state.simualtion_speed.get_speed())
+                }
                 Operation::MouseDown { x, y } => self.handle_mouse_down(x, y),
                 Operation::MouseUp { x, y } => self.handle_mouse_up(x, y),
                 Operation::Remove { x, y } => self.handle_right_click(x, y),
                 Operation::ToggleDebug => self.handle_toggle_debug(),
                 Operation::DragStart { x, y } => self.handle_drag_start(x, y),
                 Operation::DragEnd => self.handle_drag_end(),
-                //_ => println!("Unhandled input operation: {:?}", operation)
+                Operation::IncreaseSimulationSpeed => self.handle_increase_simulation_speed(),
+                Operation::DecreaseSimulationSpeed => self.handle_decrease_simulation_speed(),
             }
         }
     }
 
     pub fn next_step(&mut self, delta: f32) {
         if !self.state.is_paused {
-            self.simulator.next_step(&mut self.physics_system, delta);
+            self.simulator.next_step(
+                &mut self.physics_system,
+                delta * self.state.simualtion_speed.get_speed(),
+            );
         }
     }
 
@@ -229,6 +279,9 @@ impl Controller {
         let screen_size = screen_size();
 
         self.draw_ui_constraint_line(screen_size);
+        self.ui_renderer
+            .draw_simulation_speed(screen_size, self.state.simualtion_speed.get_speed());
+
         if self.state.is_debug_mode {
             self.ui_renderer.draw_debug_text(
                 screen_size,

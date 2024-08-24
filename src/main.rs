@@ -22,8 +22,8 @@ fn construct_controller() -> Controller {
     let physics_system = PhysicsSystem::new();
     let simulator = Simulator::new(
         SimulationParams {
-            air_resistence: 0.98,
-            gravity: 0.08,
+            air_resistence: 0.96,
+            gravity: 0.09,
             point_size,
             spring_coeff: 550.0,
             damping: 6.0,
@@ -61,6 +61,9 @@ fn construct_controller() -> Controller {
         debug_point_velocity_line_size: 0.002,
         debug_point_velocity_line_color: Color::from_rgba(255, 40, 40, 255),
         debug_point_velocity_line_length: 0.06,
+        speed_text_location: (0.01, 0.98),
+        speed_text_size: 0.04,
+        speed_text_color: WHITE,
     });
 
     Controller::new(physics_system, simulator, renderer, ui_renderer)
