@@ -2,7 +2,7 @@ use macroquad::{
     color::Color,
     math::Vec2,
     miniquad::window::screen_size,
-    shapes::{draw_ellipse, draw_line},
+    shapes::{draw_ellipse, draw_line}, window::clear_background,
 };
 
 use crate::{physics_system::PhysicsSystem, point::Point};
@@ -10,6 +10,7 @@ use crate::{physics_system::PhysicsSystem, point::Point};
 const POINT_BORDER_SIZE: f32 = 0.2;
 
 pub struct DrawParams {
+    pub bg_color: Color,
     pub point_size: f32,
     pub line_size: f32,
     pub point_color: Color,
@@ -85,6 +86,7 @@ impl Renderer {
     }
 
     pub fn draw(&self, physics_system: &PhysicsSystem) {
+        clear_background(self.draw_params.bg_color);
         let screen_size = screen_size();
         let points_ids = physics_system.get_points_ids();
 

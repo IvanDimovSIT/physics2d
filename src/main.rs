@@ -38,6 +38,7 @@ fn construct_controller() -> Controller {
         },
     );
     let renderer = Renderer::new(DrawParams {
+        bg_color: Color::from_rgba(10, 10, 40, 255),
         point_size,
         line_size,
         point_color: Color::from_rgba(50, 255, 50, 255),
@@ -74,8 +75,6 @@ async fn main() {
     let mut controller = construct_controller();
 
     loop {
-        clear_background(Color::from_rgba(10, 10, 40, 255));
-
         let delta = get_frame_time();
         let screen_size = screen_size();
 
