@@ -1,0 +1,43 @@
+[simulation_config]
+air_resistence = 0.96
+gravity = 0.09
+point_size = 0.015
+spring_coeff = 550.0
+damping = 6.0
+collision_force = 100.0
+push_from_sides_force = 0.02
+
+[bounding_box_config]
+max_x = 1.0
+max_y = 1.0
+min_x = 0.0
+min_y = 0.0
+
+[renderer_config]
+bg_color = [10, 10, 40, 255]
+point_size = 0.015
+line_size = 0.005
+point_color = [50, 255, 50, 255]
+point_border_color = [255, 255, 255, 255]
+static_point_color = [255, 50, 50, 255]
+line_color = [255, 255, 255, 255]
+stressed_line_color = [255, 0, 0, 255]
+
+[ui_renderer_config]
+paused_text_location = [0.45, 0.08]
+paused_text_size = 0.08
+paused_text_color = [255, 255, 255, 255]
+line_size = 0.005
+line_color = [255, 255, 255, 100]
+debug_text_location = [0.01, 0.05]
+debug_text_size = 0.05
+debug_text_color = [255, 255, 255, 160]
+debug_point_text_color = [230, 230, 230, 255]
+debug_point_text_size = 0.04
+debug_point_box_color = [50, 50, 50, 200]
+debug_point_velocity_line_size = 0.002
+debug_point_velocity_line_color = [255, 40, 40, 255]
+debug_point_velocity_line_length = 0.06
+speed_text_location = [0.01, 0.98]
+speed_text_size = 0.04
+speed_text_color = [255, 255, 255, 255]

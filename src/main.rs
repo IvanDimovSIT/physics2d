@@ -1,3 +1,4 @@
+use config::Config;
 use controller::Controller;
 use input::get_input;
 use macroquad::prelude::*;
@@ -7,6 +8,7 @@ use renderer::{DrawParams, Renderer};
 use simulator::{SimulationBoundingBox, SimulationParams, Simulator};
 use ui_renderer::{UiParams, UiRenderer};
 
+mod config;
 mod constraint;
 mod controller;
 mod input;
@@ -16,7 +18,9 @@ mod renderer;
 mod simulator;
 mod ui_renderer;
 
-fn construct_controller() -> Controller {
+const CONFIG_PATH: &str = "config.toml";
+
+fn construct_default_controller() -> Controller {
     let point_size = 0.015;
     let line_size = 0.005;
     let physics_system = PhysicsSystem::new();
@@ -70,9 +74,28 @@ fn construct_controller() -> Controller {
     Controller::new(physics_system, simulator, renderer, ui_renderer)
 }
 
+fn init_controller() -> Controller {
+    let config = Config::load(CONFIG_PATH);
+
+    if config.is_err() {
+        println!(
+            "Error loading config file '{CONFIG_PATH}': {}",
+            config.unwrap_err()
+        );
+        println!("Using default settings");
+
+        construct_default_controller()
+    } else {
+        let config_params = config.unwrap();
+        println!("Loaded config file '{CONFIG_PATH}'");
+
+        config_params.into()
+    }
+}
+
 #[macroquad::main("Physics")]
 async fn main() {
-    let mut controller = construct_controller();
+    let mut controller = init_controller();
 
     loop {
         let delta = get_frame_time();

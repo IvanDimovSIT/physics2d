@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use crate::{constraint::Constraint, point::Point};
 
-const STARTING_CAPACITY: usize = 8;
+const POINTS_STARTING_CAPACITY: usize = 16;
+const CONSTRAINTS_STARTING_CAPACITY: usize = 32;
+
 
 pub struct PhysicsSystem {
     id_counter: u64,
@@ -13,8 +15,8 @@ impl PhysicsSystem {
     pub fn new() -> Self {
         Self {
             id_counter: 0,
-            points: HashMap::with_capacity(STARTING_CAPACITY),
-            constraints: Vec::with_capacity(STARTING_CAPACITY),
+            points: HashMap::with_capacity(POINTS_STARTING_CAPACITY),
+            constraints: Vec::with_capacity(CONSTRAINTS_STARTING_CAPACITY),
         }
     }
 

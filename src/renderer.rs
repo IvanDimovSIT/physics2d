@@ -2,7 +2,8 @@ use macroquad::{
     color::Color,
     math::Vec2,
     miniquad::window::screen_size,
-    shapes::{draw_ellipse, draw_line}, window::clear_background,
+    shapes::{draw_ellipse, draw_line},
+    window::clear_background,
 };
 
 use crate::{physics_system::PhysicsSystem, point::Point};
