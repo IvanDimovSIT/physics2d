@@ -25,9 +25,9 @@ fn construct_controller() -> Controller {
             air_resistence: 0.98,
             gravity: 0.08,
             point_size,
-            spring_coeff: 350.0,
+            spring_coeff: 550.0,
             damping: 6.0,
-            collision_force: 80.0,
+            collision_force: 100.0,
             push_from_sides_force: 0.02,
         },
         SimulationBoundingBox {
@@ -40,9 +40,11 @@ fn construct_controller() -> Controller {
     let renderer = Renderer::new(DrawParams {
         point_size,
         line_size,
-        point_color: Color::from_rgba(255, 255, 255, 255),
+        point_color: Color::from_rgba(50, 255, 50, 255),
+        point_border_color: Color::from_rgba(255, 255, 255, 255),
         static_point_color: Color::from_rgba(255, 50, 50, 255),
         line_color: Color::from_rgba(255, 255, 255, 255),
+        stressed_line_color: Color::from_rgba(255, 0, 0, 255),
     });
     let ui_renderer = UiRenderer::new(UiParams {
         paused_text_location: (0.45, 0.08),
@@ -69,7 +71,7 @@ async fn main() {
     let mut controller = construct_controller();
 
     loop {
-        clear_background(BLACK);
+        clear_background(Color::from_rgba(10, 10, 40, 255));
 
         let delta = get_frame_time();
         let screen_size = screen_size();
